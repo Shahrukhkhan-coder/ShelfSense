@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ShelfSense — AI Book Recommender</title>
+<meta name="description" content="Discover your next read through the patterns hidden between books, using a nearest-neighbor recommendation model." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<a class="skip-link" href="#searchInput">Skip to book search</a>
+
+<!-- ================= HEADER ================= -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#top" aria-label="ShelfSense home">
+      <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-feather"></i></span>
+      <span class="brand-text">
+        <span class="brand-name">ShelfSense</span>
+        <span class="brand-tag">AI Book Recommender</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#discover">Discover</a>
+      <a href="#howItWorks">How It Works</a>
+      <a href="#recommendationMethod">Model</a>
+      <a href="#limitations">Limitations</a>
+    </nav>
+
+    <div class="header-controls">
+      <div class="model-status-badge" id="headerStatusBadge" aria-live="polite">
+        <span class="status-dot" id="headerStatusDot" aria-hidden="true"></span>
+        <span id="headerStatusText">Connecting to Library</span>
+      </div>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false">
+        <i class="fa-solid fa-moon" aria-hidden="true" id="themeToggleIcon"></i>
+        <span id="themeToggleLabel">Dark reading room</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="observatory" id="top">
+
+  <!-- ================= LEFT — READING OBSERVATORY ================= -->
+  <aside class="observatory-panel" aria-label="About Leaf and Logic">
+    <div class="observatory-panel-inner">
+
+      <div class="observatory-brand">
+        <span class="observatory-logo" aria-hidden="true"><i class="fa-solid fa-feather-pointed"></i></span>
+        <h1 class="observatory-title">ShelfSense</h1>
+        <p class="observatory-tagline">Discover your next read through the patterns hidden between books.</p>
+        <p class="observatory-desc">
+          Shelf represents a collection of books, while Sense represents the intelligent machine-learning analysis that understands similarities and helps connect readers with their next book.
+
+        </p>
+      </div>
+
+      <div class="model-status-badge model-status-badge-panel" id="panelStatusBadge" aria-live="polite">
+        <span class="status-dot" id="panelStatusDot" aria-hidden="true"></span>
+        <span id="panelStatusText">Connecting to Library</span>
+      </div>
+
+      <!-- ---- CSS bookshelf ---- -->
+      <div class="bookshelf" aria-hidden="true">
+        <span class="shelf-book" style="--h:78%;--c:1"></span>
+        <span class="shelf-book" style="--h:92%;--c:2"></span>
+        <span class="shelf-book" style="--h:65%;--c:3"></span>
+        <span class="shelf-book" style="--h:85%;--c:4"></span>
+        <span class="shelf-book" style="--h:70%;--c:5"></span>
+        <span class="shelf-book" style="--h:95%;--c:6"></span>
+        <span class="shelf-book" style="--h:60%;--c:1"></span>
+        <span class="shelf-book" style="--h:88%;--c:3"></span>
+        <span class="shelf-book" style="--h:75%;--c:5"></span>
+        <span class="shelf-plank"></span>
+      </div>
+
+      <!-- ---- CSS open-book illustration ---- -->
+      <div class="open-book" aria-hidden="true">
+        <div class="open-book-page open-book-page-left">
+          <span class="reading-line"></span>
+          <span class="reading-line" style="width:70%;"></span>
+          <span class="reading-line" style="width:85%;"></span>
+        </div>
+        <div class="open-book-spine"></div>
+        <div class="open-book-page open-book-page-right">
+          <span class="reading-line" style="width:60%;"></span>
+          <span class="reading-line" style="width:90%;"></span>
+          <span class="reading-line" style="width:75%;"></span>
+        </div>
+      </div>
+
+      <div class="dataset-badge">
+        <i class="fa-solid fa-database" aria-hidden="true"></i>
+        <span id="datasetBadgeText">Loading catalogue…</span>
+      </div>
+
+      <div class="insight-rotator" aria-live="polite">
+        <p class="insight-eyebrow">Literary insight</p>
+        <p id="rotatingInsight">Similarity in reading patterns often crosses genre boundaries.</p>
+      </div>
+
+      <div class="page-markers" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <p class="privacy-note-small">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        The selected book title is sent to the recommendation API. This page does not intentionally
+        collect personal information.
+      </p>
+
+      <p class="catalogue-detail">Nearest-neighbor similarity &middot; dataset-trained &middot; no live ratings</p>
+
+    </div>
+  </aside>
+
+  <!-- ================= RIGHT — RECOMMENDATION DESK ================= -->
+  <main class="desk-panel" id="discover">
+
+    <!-- ---- Error panel ---- -->
+    <div class="error-panel" id="errorPanel" role="alert" aria-live="assertive" hidden>
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      <div class="error-panel-body">
+        <p class="error-panel-title">Something interrupted the search</p>
+        <p id="errorPanelText"></p>
+      </div>
+      <button type="button" class="btn btn-ghost" id="retryBtn" hidden>Retry</button>
+    </div>
+
+    <!-- ---- Search heading ---- -->
+    <header class="desk-header">
+      <h2 class="desk-title">Which book stayed with you?</h2>
+      <p class="desk-subtitle">Search for a title from the trained recommendation library and discover five similar reads.</p>
+    </header>
+
+    <!-- ---- Search combobox ---- -->
+    <div class="search-combobox">
+      <div class="search-input-row">
+        <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+        <input
+          type="text"
+          id="searchInput"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="suggestionsListbox"
+          aria-autocomplete="list"
+          aria-describedby="searchInstructions"
+          autocomplete="off"
+          placeholder="Start typing a book title..."
+        />
+        <span class="search-loading-indicator" id="searchLoadingIndicator" hidden>
+          <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+        </span>
+        <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Clear search" hidden>
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <p class="sr-only" id="searchInstructions">Use the arrow keys to browse suggestions, and press Enter to select a title.</p>
+
+      <ul class="suggestions-listbox" id="suggestionsListbox" role="listbox" aria-label="Book title suggestions" hidden></ul>
+    </div>
+
+    <!-- ---- Selected book card ---- -->
+    <div class="selected-book-card" id="selectedBookCard" hidden>
+      <div class="selected-book-cover" id="selectedBookCover" aria-hidden="true"></div>
+      <div class="selected-book-info">
+        <p class="selected-book-label">Your reference book</p>
+        <p class="selected-book-title" id="selectedBookTitle"></p>
+        <p class="selected-book-note">The recommendation model will search for books with similar dataset patterns.</p>
+        <div class="selected-book-actions">
+          <button type="button" class="btn btn-ghost" id="changeBookBtn">Change book</button>
+          <button type="button" class="btn btn-ghost" id="removeSelectionBtn">Remove selection</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="empty-state-text" id="noSelectionState">Your next chapter begins with one title.</p>
+
+    <!-- ---- Primary action ---- -->
+    <button type="button" class="btn btn-primary btn-primary-lg" id="predictBtn" disabled>
+      <i class="fa-solid fa-book-sparkles" aria-hidden="true"></i> Open My Next Chapter
+    </button>
+
+    <!-- ---- Loading panel ---- -->
+    <div class="loading-panel" id="loadingPanel" aria-live="polite" aria-busy="true" hidden>
+      <div class="spine-scan" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p class="loading-heading">Searching the shelves for similar stories</p>
+      <p class="loading-subtext" id="loadingRotatorText">Reading the selected title</p>
+      <span class="sr-only">Recommendation search in progress, please wait.</span>
+    </div>
+
+    <!-- ---- Results ---- -->
+    <section class="results-panel" id="resultsPanel" aria-live="polite" hidden>
+
+      <header class="results-header">
+        <h2>Your Next Five Reads</h2>
+        <p>These titles were selected because their dataset patterns are closest to your chosen book.</p>
+      </header>
+
+      <p class="results-reference">Based on: <strong id="resultsReferenceTitle"></strong></p>
+
+      <div class="recommendation-grid" id="recommendationGrid"></div>
+
+      <p class="results-meta" id="resultsMeta"></p>
+
+      <div class="results-explainer">
+        <p>
+          Each title is represented by its values in the trained book dataset. The selected book's
+          feature vector is compared against other books using a nearest-neighbor model, and the five
+          closest titles are returned. The selected book itself is excluded.
+        </p>
+      </div>
+
+      <p class="results-disclaimer">
+        ShelfSense provides machine-learning-generated book suggestions for educational and
+        discovery purposes. Recommendations are based on dataset similarity and may not always match
+        individual reading preferences.
+      </p>
+
+      <div class="results-actions">
+        <button type="button" class="btn btn-primary" id="recommendAgainBtn">Recommend again</button>
+        <button type="button" class="btn btn-secondary" id="chooseAnotherBtn">Choose another book</button>
+        <button type="button" class="btn btn-secondary" id="copyListBtn">Copy reading list</button>
+        <button type="button" class="btn btn-secondary" id="downloadListBtn">Download reading list</button>
+        <button type="button" class="btn btn-secondary" id="printListBtn">Print reading list</button>
+        <button type="button" class="btn btn-secondary" id="saveSessionBtn">Save session</button>
+        <button type="button" class="btn btn-ghost" id="clearResultsBtn">Clear results</button>
+      </div>
+
+    </section>
+
+    <!-- ---- Recently explored ---- -->
+    <section class="history-section">
+      <h2>Recently Explored</h2>
+      <ul class="history-list" id="historyList"></ul>
+      <p class="empty-state-text" id="historyEmptyState">No titles explored yet this session.</p>
+    </section>
+
+    <!-- ---- How it works ---- -->
+    <section class="info-section" id="howItWorks">
+      <h2>How It Works</h2>
+      <ol class="how-it-works-list">
+        <li>Select a book from the trained catalogue.</li>
+        <li>The title is located in the book-feature pivot table.</li>
+        <li>The nearest-neighbor model compares its feature vector with other books.</li>
+        <li>The five closest titles are returned.</li>
+      </ol>
+    </section>
+
+    <!-- ---- Recommendation method ---- -->
+    <section class="info-section" id="recommendationMethod">
+      <h2>Recommendation Method</h2>
+      <p>
+        Each title is represented by its values in the trained book dataset. The selected book's
+        feature vector is sent to a nearest-neighbor model, which finds nearby book vectors, excludes
+        the selected book itself, and returns the next five titles.
+      </p>
+    </section>
+
+    <!-- ---- Limitations ---- -->
+    <section class="info-section" id="limitations">
+      <h2>Limitations</h2>
+      <ul class="limitations-list">
+        <li>A title must exist in the trained dataset.</li>
+        <li>Recommendations depend on the available dataset.</li>
+        <li>Results are not based on live popularity.</li>
+        <li>Similarity does not guarantee personal enjoyment.</li>
+        <li>The model does not replace human literary judgment.</li>
+        <li>The system may not recognize alternate spellings or editions.</li>
+      </ul>
+    </section>
+
+    <!-- ---- Privacy ---- -->
+    <section class="info-section" id="privacySection">
+      <h2>Privacy</h2>
+      <p>The selected book title is sent to the recommendation API. This page does not intentionally collect personal information.</p>
+    </section>
+
+    <!-- ---- Disclaimer ---- -->
+    <section class="info-section" id="disclaimerSection">
+      <h2>Disclaimer</h2>
+      <p>
+        ShelfSense provides machine-learning-generated book suggestions for educational and
+        discovery purposes. Recommendations are based on dataset similarity and may not always match
+        individual reading preferences.
+      </p>
+    </section>
+
+    <!-- ---- Technology stack ---- -->
+    <!--<section class="info-section" id="techStack">
+      <h2>Technology Stack</h2>
+      <div class="tech-badge-row">
+        <span class="tech-badge"><i class="fa-brands fa-html5" aria-hidden="true"></i> HTML5</span>
+        <span class="tech-badge"><i class="fa-brands fa-css3-alt" aria-hidden="true"></i> CSS3</span>
+        <span class="tech-badge"><i class="fa-brands fa-js" aria-hidden="true"></i> JavaScript</span>
+        <span class="tech-badge"><i class="fa-solid fa-bolt" aria-hidden="true"></i> FastAPI</span>
+        <span class="tech-badge"><i class="fa-solid fa-shapes" aria-hidden="true"></i> Pydantic</span>
+        <span class="tech-badge"><i class="fa-solid fa-table" aria-hidden="true"></i> Pandas</span>
+        <span class="tech-badge"><i class="fa-solid fa-hashtag" aria-hidden="true"></i> NumPy</span>
+        <span class="tech-badge"><i class="fa-solid fa-box" aria-hidden="true"></i> Joblib</span>
+        <span class="tech-badge"><i class="fa-solid fa-brain" aria-hidden="true"></i> Scikit-learn</span>
+        <span class="tech-badge"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> Nearest Neighbors</span>
+      </div>
+    </section>-->
+
+    <footer class="site-footer">
+      <p class="footer-brand">ShelfSense</p>
+      <p class="footer-sub">AI Book Recommender &mdash; Educational machine-learning project &copy; <span id="currentYear"></span></p>
+      <p class="footer-links">
+        <a href="#privacySection">Privacy</a> &middot; <a href="#limitations">Limitations</a> &middot;
+        <a href="#top" id="backToTopLink">Back to top</a>
+      </p>
+    </footer>
+
+  </main>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/static/script.js"></script>
+</body>
+</html> 
