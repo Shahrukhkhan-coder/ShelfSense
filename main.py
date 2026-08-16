@@ -30,11 +30,26 @@ def health():
         'Model_loaded' : model is not None
     }
 
+import traceback
+import os
+
 @app.get("/books")
 def get_books():
-    return {
-        "books": [str(title) for title in book_pivot.index.tolist()]
-    }
+    try:
+        print("=== /books called ===")
+        print("Current folder:", os.getcwd())
+        print("Files here:", os.listdir("."))
+        
+        book_pivot
+        print("Loaded df with shape:", book_pivot.shape)
+        
+        books = book_pivot.head(100).to_dict(orient="records")
+        return {"status": "ok", "total": len(book_pivot), "books": books}
+        
+    except Exception as e:
+        print("ERROR IN /books:", e)
+        print(traceback.format_exc())
+        return {"status": "error", "detail": str(e)}
 
 @app.post('/predict', response_model=BookResponse)
 def books_finder(book: book_valid):
