@@ -6,7 +6,7 @@
 //   const HEALTH_URL = "/health";
 //   const BOOKS_URL = "/books";
 //   const PREDICT_URL = "/predict";
-const API_BASE_URL = "https://your-shelfsense-link.up.railway.app";
+const API_BASE_URL = "https://shelfsense-production-b655.up.railway.app";
 const HEALTH_URL = `${API_BASE_URL}/health`;
 const BOOKS_URL = `${API_BASE_URL}/books`;
 const PREDICT_URL = `${API_BASE_URL}/predict`;
