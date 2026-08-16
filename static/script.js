@@ -6,7 +6,7 @@
 //   const HEALTH_URL = "/health";
 //   const BOOKS_URL = "/books";
 //   const PREDICT_URL = "/predict";
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "https://your-shelfsense-link.up.railway.app";
 const HEALTH_URL = `${API_BASE_URL}/health`;
 const BOOKS_URL = `${API_BASE_URL}/books`;
 const PREDICT_URL = `${API_BASE_URL}/predict`;

@@ -2,19 +2,10 @@ import joblib
 from fastapi import HTTPException
 import pandas as pd
 import numpy as np
-from functools import lru_cache
-from main import book_pivot
 
 model = joblib.load('model/book_recommender.pkl')
 
-#book_pivot = pd.read_csv('https://raw.githubusercontent.com/Shahrukhkhan-coder/ShelfSense/refs/heads/master/model/Datasets/book_set.csv')
-BOOKS_URL = 'https://raw.githubusercontent.com/Shahrukhkhan-coder/ShelfSense/refs/heads/master/model/Datasets/book_set.csv'
-
-@lru_cache()
-def load_catalogue():
-    book_pivot = pd.read_csv(BOOKS_URL)
-    return book_pivot
-
+book_pivot = pd.read_csv('https://raw.githubusercontent.com/Shahrukhkhan-coder/ShelfSense/refs/heads/master/model/Datasets/book_set.csv')
 book_pivot.set_index('title', inplace=True)
 
 

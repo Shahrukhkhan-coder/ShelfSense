@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from schema.book_name import book_valid
 from schema.recommendation_response import BookResponse
-from model.recommend import recommend_book,model,book_pivot,load_catalogue
+from model.recommend import recommend_book,model,book_pivot
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -17,19 +17,6 @@ app.add_middleware(
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-
-# 3. Add the books endpoint
-@app.get("/books")
-def get_books():
-    try:
-        book_pivot = load_catalogue()
-        # Return first 100 books so it doesn't crash browser
-        books = book_pivot.head(100).to_dict(orient="records")
-        return {"status": "ok", "total": len(book_pivot), "books": books}
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
 
 @app.get('/')
 def home():
