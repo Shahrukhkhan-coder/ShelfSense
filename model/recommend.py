@@ -5,7 +5,7 @@ import numpy as np
 
 model = joblib.load('model/book_recommender.pkl')
 
-book_pivot = pd.read_csv('https://raw.githubusercontent.com/Shahrukhkhan-coder/ShelfSense/refs/heads/master/model/Datasets/book_set.csv')
+book_pivot = pd.read_csv('model/Datasets/book_set.csv')
 book_pivot.set_index('title', inplace=True)
 
 
